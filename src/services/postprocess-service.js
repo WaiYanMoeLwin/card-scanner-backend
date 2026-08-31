@@ -1,9 +1,7 @@
-const {loadOpenCV} = require('../utils/openCV-loader.js');
-const {perspectiveTransform, matToImageBuffer, saveImageBufferAsJPEG} = require('../utils/image-utils.js');
+const {perspectiveTransform, matToImageBuffer, saveImageBufferAsJPEG, drawBoundingBoxOnImage} = require('../utils/image-utils.js');
 
 async function postprocessDetections(detectionResults, mat, modelInputSize = 640) {
-    const {cv} = await loadOpenCV();
-    const postprocessedResults = await Promise.all(detectionResults.map(async detection => {
+    const postprocessedResults = await Promise.all(detectionResults.map(async (detection, index) => {
         detection = await rescaleImage(detection, mat.cols, mat.rows, modelInputSize);
         const {bbox, keypoints} = detection;
         const {x1, y1, x2, y2} = bbox;
@@ -19,8 +17,8 @@ async function postprocessDetections(detectionResults, mat, modelInputSize = 640
 
         const warpedMat = await perspectiveTransform(mat, srcPoints, dstPoints);
         const warpedImageBuffer = await matToImageBuffer(warpedMat);
-        const warpedImagePath = await saveImageBufferAsJPEG(warpedImageBuffer, '../statics/warped_images', 'warped_card');
-
+        const warpedImagePath = await saveImageBufferAsJPEG(warpedImageBuffer, '../statics/warped_images', `warped_card_${index}`);
+        
         return {
             ...detection,
             warpedImageBuffer,

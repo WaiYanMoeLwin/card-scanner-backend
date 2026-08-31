@@ -9,7 +9,7 @@ async function performInference(imageBuffer) {
     const classificationResults = await onnxService.runPipeline(imageBuffer);
     const numOfCardsDetected = classificationResults.length;
 
-    await InferenceResult.create({
+    const inferenceResult = await InferenceResult.create({
         number_of_cards: numOfCardsDetected,
         original_image_path: inferenceImagePath,
         results: classificationResults.map(result => ({
@@ -25,7 +25,7 @@ async function performInference(imageBuffer) {
         }))
     })
 
-    return classificationResults;
+    return inferenceResult;
 }
 
 module.exports = {

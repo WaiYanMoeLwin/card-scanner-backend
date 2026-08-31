@@ -65,9 +65,16 @@ async function saveImageBufferAsJPEG(imageBuffer, outputPath, filename) {
     return `${absoluteOutputPath}/${outputFileName}`;
 }
 
+async function readImageAsBase64(imagePath) {
+    sharp.cache(false); // Disable sharp caching to avoid memory issues
+    const imageBuffer = await sharp(imagePath).toBuffer();
+    return imageBuffer.toString('base64');
+}
+
 module.exports = {
     bufferToMat,
     perspectiveTransform,
     matToImageBuffer,
-    saveImageBufferAsJPEG
+    saveImageBufferAsJPEG,
+    readImageAsBase64
 };
