@@ -31,11 +31,6 @@ const performInference = async (req, res) => {
             if (result.warped_image_path) {
                 result.warped_image_base64 = await readImageAsBase64(result.warped_image_path);
             }
-            for (const classification of result.classification_results) {
-                if (classification.image_path) {
-                    classification.image_base64 = await readImageAsBase64(classification.image_path);
-                }
-            }
         }
 
         res.json(responseData);

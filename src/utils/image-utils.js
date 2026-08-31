@@ -59,10 +59,8 @@ async function saveImageBufferAsJPEG(imageBuffer, outputPath, filename) {
     // Create the output directory if it doesn't exist
     await fs.promises.mkdir(outputPath, { recursive: true });
 
-    const absoluteOutputPath = path.resolve(outputPath);
-
-    await fs.promises.writeFile(`${absoluteOutputPath}/${outputFileName}`, imageBuffer);
-    return `${absoluteOutputPath}/${outputFileName}`;
+    await fs.promises.writeFile(`${outputPath}/${outputFileName}`, imageBuffer);
+    return `${outputPath}/${outputFileName}`;
 }
 
 async function readImageAsBase64(imagePath) {
