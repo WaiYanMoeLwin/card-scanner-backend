@@ -4,10 +4,11 @@ const inferenceRoute = require('./routes/inference-route.js');
 const cors = require('cors');
 
 const app = express();
+const allowedOrigins = ['http://localhost:5173', 'https://card-scanner-frontend.onrender.com'];
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors({
-    origin: 'http://localhost:5173',
+    origin: allowedOrigins,
     methods: ['GET', 'POST'],
     allowedHeaders: ['Content-Type'],
 }));
