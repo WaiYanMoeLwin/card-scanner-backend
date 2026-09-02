@@ -3,14 +3,15 @@ const inferenceService = require('../services/inference-service');
 const {readImageAsBase64} = require('../utils/image-utils');
 
 const performInference = async (req, res) => {
-    const {cv} = await loadOpenCV();
+    const game = req.query.game || 'dg7'; // Default to 'dg7' if no game is specified
+    console.log(`Performing inference for game: ${game}`);
     try {
         const image = req.file;
         if (!image) {
             return res.status(400).json({ error: 'Image is required for inference.' });
         }
 
-        const inferenceResult = await inferenceService.performInference(image.buffer);
+        const inferenceResult = await inferenceService.performInference(image.buffer, game);
         const responseData = {
             number_of_cards: inferenceResult.number_of_cards,
             original_image_path: inferenceResult.original_image_path,
@@ -34,6 +35,7 @@ const performInference = async (req, res) => {
         }
 
         res.json(responseData);
+        console.log(`Inference completed successfully. ${responseData.number_of_cards} cards detected.`);
     } catch (error) {
         console.error('Error during inference:', error);
         res.status(500).json({ error: 'An error occurred during inference.' });

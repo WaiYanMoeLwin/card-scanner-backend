@@ -3,10 +3,10 @@ const ort = require('onnxruntime-node');
 const {saveImageBufferAsJPEG} = require('../utils/image-utils');
 const InferenceResult = require('../models/inference-result');
 
-async function performInference(imageBuffer) {
+async function performInference(imageBuffer, game) {
 
     const inferenceImagePath = await saveImageBufferAsJPEG(imageBuffer, '../statics/inference_images', 'inference_result');
-    const classificationResults = await onnxService.runPipeline(imageBuffer);
+    const classificationResults = await onnxService.runPipeline(imageBuffer, game);
     const numOfCardsDetected = classificationResults.length;
 
     const inferenceResult = await InferenceResult.create({

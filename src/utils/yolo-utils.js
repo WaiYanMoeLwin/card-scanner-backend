@@ -41,7 +41,7 @@ function parseYoloPoseOutput(output0, confidenceThreshold = 0.5) {
     return detections;
 }
 
-function parseYoloClassificationOutput(session, output0, confidenceThreshold = 0.0, selectTopK = 5) {
+function parseYoloClassificationOutput(output0, confidenceThreshold = 0.0, selectTopK = 5, game) {
     const { cpuData, dims } = output0;
     const [batchSize, numClasses] = dims;
 
@@ -49,8 +49,6 @@ function parseYoloClassificationOutput(session, output0, confidenceThreshold = 0
     for (let i = 0; i < flat.length; i++) {
         flat[i] = cpuData[i];
     }
-
-    const classNames = session.outputNames.map(name => name.replace('output_', ''));
 
     const results = [];
     for (let i = 0; i < numClasses; i++) {
@@ -60,9 +58,9 @@ function parseYoloClassificationOutput(session, output0, confidenceThreshold = 0
         }
         results.push({
             classId: i,
-            className: getClassName(i),
+            className: getClassName(i, game),
             confidence: confidence,
-            imagePath: getClassImagePath(i)
+            imagePath: getClassImagePath(i, game)
         });
     }
 

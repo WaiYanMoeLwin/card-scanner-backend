@@ -1,4 +1,4 @@
-const {perspectiveTransform, matToImageBuffer, saveImageBufferAsJPEG, drawBoundingBoxOnImage} = require('../utils/image-utils.js');
+const {perspectiveTransform, matToImageBuffer, saveImageBufferAsJPEG} = require('../utils/image-utils.js');
 
 async function postprocessDetections(detectionResults, mat, modelInputSize = 640) {
     const postprocessedResults = await Promise.all(detectionResults.map(async (detection, index) => {

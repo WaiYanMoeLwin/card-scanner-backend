@@ -7,9 +7,10 @@ const {postprocessDetections} = require('../services/postprocess-service');
 const {perspectiveTransform} = require('../utils/image-utils');
 
 const classificationModelPath = path.join(__dirname, '../../statics/models/classify.onnx');
-const detectionModelPath = path.join(__dirname, '../../statics/models/detect.onnx');
+const detectionModelPath = path.join(__dirname, '../../statics/models/detect3.onnx');
+const opClassificationModelPath = path.join(__dirname, '../../statics/models/op_cls.onnx');
 
-let classificationSession = null;
+let classificationSession = new Map();
 let detectionSession = null;
 
 async function initializeSessions() {
@@ -18,7 +19,8 @@ async function initializeSessions() {
         return;
     }
     try {
-        classificationSession = await ort.InferenceSession.create(classificationModelPath);
+        classificationSession.set('dg7', await ort.InferenceSession.create(classificationModelPath));
+        classificationSession.set('op14', await ort.InferenceSession.create(opClassificationModelPath));
         detectionSession = await ort.InferenceSession.create(detectionModelPath);
         console.log('ONNX sessions initialized successfully.');
     } catch (error) {
@@ -36,16 +38,17 @@ async function runDetection(inputTensor) {
     return detections;
 }
 
-async function runClassification(inputTensor) {
-    if (!classificationSession) {
-        throw new Error('Classification session is not initialized. Call initializeSessions() first.');
+async function runClassification(inputTensor, game) {
+    if (!classificationSession.has(game)) {
+        throw new Error(`Classification session for game '${game}' is not initialized. Call initializeSessions() first.`);
     }
-    const inputName = classificationSession.inputNames[0];
-    const results = await classificationSession.run({ [inputName]: inputTensor });
-    return parseYoloClassificationOutput(classificationSession, results.output0);
+    const session = classificationSession.get(game);
+    const inputName = session.inputNames[0];
+    const results = await session.run({ [inputName]: inputTensor });
+    return parseYoloClassificationOutput(results.output0, confidenceThreshold = 0.0, selectTopK = 5, game);
 }
 
-async function runPipeline(imageBuffer) {
+async function runPipeline(imageBuffer, game) {
     const {imageMat, chwArray} = await preprocessImage(imageBuffer, [640, 640]);
         
     const inputTensor = new ort.Tensor('float32', chwArray, [1, 3, 640, 640]);
@@ -58,7 +61,7 @@ async function runPipeline(imageBuffer) {
         const {warpedImageBuffer, ...restResult} = result;
         const warpedCHWArray = await preprocessImage(warpedImageBuffer, [330, 460]).then(res => res.chwArray);
         const warpedInputTensor = new ort.Tensor('float32', warpedCHWArray, [1, 3, 460, 330]);
-        const classificationResult = await runClassification(warpedInputTensor);
+        const classificationResult = await runClassification(warpedInputTensor, game);
         return {
             ...restResult,
             classification: classificationResult
