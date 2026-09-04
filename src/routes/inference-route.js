@@ -6,4 +6,6 @@ const upload = multer({ storage: multer.memoryStorage() });
 
 router.post('/inference', upload.single('image'), inferenceController.performInference);
 
+router.get('/warped-image', inferenceController.getWarpedImage);
+
 module.exports = router;

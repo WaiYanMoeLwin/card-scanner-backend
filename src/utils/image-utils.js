@@ -38,12 +38,9 @@ async function matToImageBuffer(mat) {
     const width = mat.cols;
     const height = mat.rows;
     const channels = mat.channels();
-    const rgbaMat = new cv.Mat();
-    cv.cvtColor(mat, rgbaMat, cv.COLOR_RGB2RGBA);
 
-    const buffer = Buffer.from(rgbaMat.data);
-    rgbaMat.delete();
-
+    const buffer = Buffer.from(mat.data);
+    mat.delete();
     const imageBuffer = await sharp(buffer, {
         raw: {
             width: width,
@@ -56,17 +53,21 @@ async function matToImageBuffer(mat) {
 
 async function saveImageBufferAsJPEG(imageBuffer, outputPath, filename) {
     const outputFileName = `${filename}_${Date.now()}.jpg`;
-    // Create the output directory if it doesn't exist
-    await fs.promises.mkdir(outputPath, { recursive: true });
+    if (!fs.existsSync(outputPath)) {
+        await fs.promises.mkdir(outputPath, { recursive: true });
+    }
 
-    await fs.promises.writeFile(`${outputPath}/${outputFileName}`, imageBuffer);
+    fs.promises.writeFile(`${outputPath}/${outputFileName}`, imageBuffer)
+        .catch(err => {
+            console.error(`Error saving image to ${outputPath}/${outputFileName}:`, err);
+            throw err;
+        });
     return `${outputPath}/${outputFileName}`;
 }
 
-async function readImageAsBase64(imagePath) {
-    sharp.cache(false); // Disable sharp caching to avoid memory issues
+async function readImage(imagePath) {
     const imageBuffer = await sharp(imagePath).toBuffer();
-    return imageBuffer.toString('base64');
+    return imageBuffer;
 }
 
 module.exports = {
@@ -74,5 +75,5 @@ module.exports = {
     perspectiveTransform,
     matToImageBuffer,
     saveImageBufferAsJPEG,
-    readImageAsBase64
+    readImage
 };

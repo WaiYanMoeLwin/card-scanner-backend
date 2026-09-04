@@ -6,7 +6,9 @@ const InferenceResult = require('../models/inference-result');
 async function performInference(imageBuffer, game) {
 
     const inferenceImagePath = await saveImageBufferAsJPEG(imageBuffer, '../statics/inference_images', 'inference_result');
+    // console.log(`Memory before (external, rss, heapUsed): ${process.memoryUsage().external}, ${process.memoryUsage().rss}, ${process.memoryUsage().heapUsed}`);
     const classificationResults = await onnxService.runPipeline(imageBuffer, game);
+    // console.log(`Memory after (external, rss, heapUsed): ${process.memoryUsage().external}, ${process.memoryUsage().rss}, ${process.memoryUsage().heapUsed}`);
     const numOfCardsDetected = classificationResults.length;
 
     const inferenceResult = await InferenceResult.create({

@@ -18,13 +18,14 @@ async function postprocessDetections(detectionResults, mat, modelInputSize = 640
         const warpedMat = await perspectiveTransform(mat, srcPoints, dstPoints);
         const warpedImageBuffer = await matToImageBuffer(warpedMat);
         const warpedImagePath = await saveImageBufferAsJPEG(warpedImageBuffer, '../statics/warped_images', `warped_card_${index}`);
-        
+
         return {
             ...detection,
             warpedImageBuffer,
             warpedImagePath
         }
     }));
+    mat.delete();
     return postprocessedResults;
 }
 
