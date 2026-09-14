@@ -14,6 +14,7 @@ app.use(cors({
 }));
 
 app.use('/api', inferenceRoute);
+app.use('/api', require('./routes/images.js'));
 app.get('/', (req, res) => {
     res.send('Welcome to the Card Scanner API');
 });
