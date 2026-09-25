@@ -3,10 +3,14 @@ const priceServices = require('../services/price-services');
 
 async function scrapeAndStorePrices(req, res) {
     try {
-        const priceEntries = await scrapePrices();
-        await priceServices.createBulkPriceEntries(priceEntries);
-        console.log(`Successfully scraped and stored ${priceEntries.length} price entries.`);
-        res.status(200).json({ message: 'Prices scraped and stored successfully', entries: priceEntries.length });
+        scrapePrices().then(priceEntries => {
+            priceServices.createBulkPriceEntries(priceEntries).then(() => {
+                console.log('Successfully scraped and stored price entries.');
+            }).catch(err => {
+                console.error('Error storing price entries:', err);
+            });
+        });
+        res.status(200).json({ message: 'Prices are being scraped and will be stored in the database shortly.' });
     } catch (error) {
         console.error('Error scraping and storing prices:', error);
         res.status(500).json({ message: 'Error scraping and storing prices', error: error.message });
